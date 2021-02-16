@@ -1,7 +1,7 @@
 const path = require("path");
 const csv = require("csvtojson");
 
-const readListings = async () => {
+const fetchListings = async () => {
   const listings = await csv().fromFile(
     path.join(__dirname, "../data/listings.csv")
   );
@@ -16,7 +16,7 @@ const readListings = async () => {
   });
 };
 
-const readContacts = async () => {
+const fetchContacts = async () => {
   const contacts = await csv().fromFile(
     path.join(__dirname, "../data/contacts.csv")
   );
@@ -30,7 +30,7 @@ const readContacts = async () => {
 };
 
 const averageListingSellingPrice = async () => {
-  const listings = await readListings();
+  const listings = await fetchListings();
   const sellerTypes = ["dealer", "private", "other"];
   output = [];
 
@@ -50,9 +50,30 @@ const averageListingSellingPrice = async () => {
   return output;
 };
 
+const percentualDistribution = async () => {
+  const listings = await fetchListings();
+  const count = {};
+
+  // Count how many times a certain make appears in the listings dataset
+  listings.forEach((listing) => {
+    if (Object.keys(count).includes(listing.make)) {
+      count[listing.make] += 1;
+    } else {
+      count[listing.make] = 1;
+    }
+  });
+
+  // Convert the count to a percentual amount of listings
+  for (let key of Object.keys(count)) {
+    count[key] = Math.round((count[key] / listings.length) * 100);
+  }
+
+  return count;
+};
+
 module.exports = async () => {
-  const result = await averageListingSellingPrice();
-  console.log(result);
-  // const contacts = await readContacts();
-  // console.log(contacts);
+  const averageListings = await averageListingSellingPrice();
+  console.log(averageListings);
+  const percentages = await percentualDistribution();
+  console.log(percentages);
 };
