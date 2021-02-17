@@ -1,5 +1,6 @@
-const path = require("path");
-const csv = require("csvtojson");
+import path from 'path'
+import csv from 'csvtojson'
+import { __dirname } from '../source/expose.mjs'
 
 const listingRepo = {
   data: [],
@@ -28,4 +29,4 @@ const listingRepo = {
   },
 };
 
-export { listingRepo };
+export default listingRepo;

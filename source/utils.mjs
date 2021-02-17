@@ -31,4 +31,4 @@ const remodelDataBasedOnDate = (data, dateHeader) => {
   return restructuredData;
 };
 
-module.exports = { calculateFrequencies, remodelDataBasedOnDate };
+export { calculateFrequencies, remodelDataBasedOnDate }

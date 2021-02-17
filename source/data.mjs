@@ -1,6 +1,7 @@
-const path = require("path");
-const csv = require("csvtojson");
-const { calculateFrequencies, remodelDataBasedOnDate } = require("./utils.js");
+import path from 'path'
+import csv from 'csvtojson'
+import { __dirname } from '../source/expose.mjs'
+import { calculateFrequencies, remodelDataBasedOnDate } from './utils.mjs'
 
 const fetchListings = async () => {
   const listings = await csv().fromFile(
@@ -140,13 +141,4 @@ const topFiveMostContactedListings = async () => {
   return data;
 };
 
-module.exports = async () => {
-  // const averageListings = await avgListingSellingPrice();
-  // console.log(averageListings);
-  // const percentages = await percentua3lDistribution();
-  // console.log(percentages);
-  const avg = await avgPriceOfMostContactedListings();
-  console.log(avg);
-  const topFive = await topFiveMostContactedListings();
-  console.log(topFive["2020"]);
-};
+export { fetchListings }
