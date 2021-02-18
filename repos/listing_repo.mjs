@@ -1,6 +1,6 @@
 import path from 'path'
 import csv from 'csvtojson'
-import { __dirname } from '../source/expose.mjs'
+import { __dirname } from './expose.mjs'
 
 const listingRepo = {
   data: [],

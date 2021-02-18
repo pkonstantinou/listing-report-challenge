@@ -4,9 +4,119 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Listing Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/style.css">
+    <title>Listing Reports</title>
   </head>
   <body>
-    <h1>Listing report</h1>
+    <div class="container my-5 text-center">
+      <h1 class="fs-2 mb-4 fw-normal">Listing reports</h1>
+
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#report_1" type="button" role="tab" aria-controls="report_1" aria-selected="true">Report 1</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#report_2" type="button" role="tab" aria-controls="report_2" aria-selected="false">Report 2</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#report_3" type="button" role="tab" aria-controls="report_3" aria-selected="false">Report 3</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#report_4" type="button" role="tab" aria-controls="report_4" aria-selected="false">Report 4</button>
+        </li>
+      </ul>
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="report_1" role="tabpanel" aria-labelledby="home-tab">
+          <h3 class="fs-5 mt-5 fw-normal">Average Listing Selling Price per Seller Type</h3>
+          <table class="table table-hover mt-4">
+            <thead>
+              <tr>
+                <th scope="col">Seller Type</th>
+                <th scope="col">Average in Euro</th>
+              </tr>
+            </thead>
+            <tbody>
+            <% reports.avgListingSellingPrice.forEach((el) => { %>
+              <tr>
+                <td><%= el.sellerType %></td>
+                <td>€ <%= el.average %>,-</td>
+              </tr>
+            <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <div class="tab-pane fade" id="report_2" role="tabpanel" aria-labelledby="profile-tab">
+          <h3 class="fs-5 mt-5 fw-normal">Percentual distribution of available cars by Make</h3>
+          <table class="table table-hover mt-4">
+            <thead>
+              <tr>
+                <th scope="col">Make</th>
+                <th scope="col">Distribution</th>
+              </tr>
+            </thead>
+            <tbody>
+            <% Object.keys(reports.percentualDistribution).forEach((make) => { %>
+              <tr>
+                <td><%= make %></td>
+                <td><%= reports.percentualDistribution[make] %>%</td>
+              </tr>
+            <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <div class="tab-pane fade" id="report_3" role="tabpanel" aria-labelledby="contact-tab">
+          <h3 class="fs-5 mt-5 fw-normal">Average price of the 30% most contacted listings</h3>
+          <table class="table table-hover mt-4">
+            <thead>
+              <tr>
+                <th scope="col">Average Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>€ <%= reports.avgPriceOfMostContactedListings %>,-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tab-pane fade" id="report_4" role="tabpanel" aria-labelledby="contact-tab">
+          <h3 class="fs-5 mt-5 fw-normal">The Top 5 most contacted listings per Month</h3>
+          <% Object.keys(reports.topFiveMostContactedListings).forEach((year) => { %>
+            <% Object.keys(reports.topFiveMostContactedListings[year]).forEach((month) => { %>
+              <p class="text-start mb-0 mt-5"><%= `0${month}`.slice(-2, 3) %>.<%= year %></p>
+              <table class="table table-hover mt-1">
+                <thead>
+                  <tr>
+                    <th scope="col">Ranking</th>
+                    <th scope="col">Listing Id</th>
+                    <th scope="col">Make</th>
+                    <th scope="col">Selling Price</th>
+                    <th scope="col">Mileage</th>
+                    <th scope="col">Total Acount of Contacts</th>
+                  </tr>
+                </thead>
+                <tbody>
+                <% reports.topFiveMostContactedListings[year][month].forEach((listing) => { %>
+                  <tr>
+                    <td><%= listing.ranking %></td>
+                    <td><%= listing.listing_id %></td>
+                    <td><%= listing.make %></td>
+                    <td>€ <%= listing.price %>,-</td>
+                    <td><%= listing.mileage %></td>
+                    <td><%= listing.amount_of_contacts %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+              </table>
+            <% }) %>
+          <% }) %>
+        </div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
   </body>
 </html>
+
+
+

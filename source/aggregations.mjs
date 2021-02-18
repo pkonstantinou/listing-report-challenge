@@ -1,47 +1,14 @@
-import path from 'path'
-import csv from 'csvtojson'
-import { __dirname } from '../source/expose.mjs'
 import { calculateFrequencies, remodelDataBasedOnDate } from './utils.mjs'
+import listingRepo from '../repos/listing_repo.mjs';
+import contactRepo from '../repos/contact_repo.mjs';
 
-const fetchListings = async () => {
-  const listings = await csv().fromFile(
-    path.join(__dirname, "../data/listings.csv")
-  );
-
-  return listings.map((listing) => {
-    return {
-      ...listing,
-      price: Number.parseInt(listing.price, 10),
-      mileage: Number.parseInt(listing.mileage, 10),
-    };
-  });
-};
-
-const fetchContacts = async () => {
-  const contacts = await csv().fromFile(
-    path.join(__dirname, "../data/contacts.csv")
-  );
-
-  return contacts.map((contact) => {
-    return {
-      ...contact,
-      contact_date: Number.parseInt(contact.contact_date, 10),
-    };
-  });
-};
-
-const findElement = (repo, id) => {
-  const element = repo.find((el) => el["id"] === id);
-  return element;
-};
-
-const avgListingSellingPrice = async () => {
-  const listings = await fetchListings();
+const avgListingSellingPrice = (listingRepo) => {
+  const listings = listingRepo.all()
   const sellerTypes = ["dealer", "private", "other"];
-  output = [];
+  const output = [];
 
   sellerTypes.forEach((sellerType) => {
-    sellerListings = listings.filter(
+    const sellerListings = listings.filter(
       (listing) => listing.seller_type === sellerType
     );
 
@@ -56,8 +23,8 @@ const avgListingSellingPrice = async () => {
   return output;
 };
 
-const percentualDistribution = async () => {
-  const listings = await fetchListings();
+const percentualDistribution = (listingRepo) => {
+  const listings = listingRepo.all()
   const count = {};
 
   // Count how many times a certain make appears in the listings dataset
@@ -77,11 +44,8 @@ const percentualDistribution = async () => {
   return count;
 };
 
-const avgPriceOfMostContactedListings = async () => {
-  const contacts = await fetchContacts();
-  const listings = await fetchListings();
-
-  const contactFreqs = calculateFrequencies(contacts, "listing_id");
+const avgPriceOfMostContactedListings = (listingRepo, contactRepo) => {
+  const contactFreqs = calculateFrequencies(contactRepo.all(), "listing_id");
 
   // Sort by highest contacted
   const entries = Object.entries(contactFreqs);
@@ -94,18 +58,16 @@ const avgPriceOfMostContactedListings = async () => {
   // Calculate the average price of the highest 30%
   let total = 0;
   mostContactedListings.forEach((listing) => {
-    total += findElement(listings, listing[0])["price"];
+    total += listingRepo.find(listing[0])['price']
   });
   const average = Math.round(total / size);
 
   return average;
 };
 
-const topFiveMostContactedListings = async () => {
-  const contacts = await fetchContacts();
-  const listings = await fetchListings();
+const topFiveMostContactedListings = (listingRepo, contactRepo) => {
   // Remodel the contacts dataset based on date
-  const data = remodelDataBasedOnDate(contacts, "contact_date");
+  const data = remodelDataBasedOnDate(contactRepo.all(), "contact_date");
 
   // Dig into the remodeled dataset and search for most contacted listings
   Object.keys(data).forEach((year) => {
@@ -124,7 +86,7 @@ const topFiveMostContactedListings = async () => {
       // listings dataset and store them in a temporary array
       const tempArray = [];
       topFiveListings.forEach((listing, index) => {
-        const element = findElement(listings, listing[0]);
+        const element = listingRepo.find(listing[0]);
         const object = {
           listing_id: listing[0],
           amount_of_contacts: listing[1],
@@ -141,4 +103,14 @@ const topFiveMostContactedListings = async () => {
   return data;
 };
 
-export { fetchListings }
+const generateReports = (listingsRepo, contactsRepo) => {
+  
+  return {
+    avgListingSellingPrice: avgListingSellingPrice(listingsRepo),
+    percentualDistribution: percentualDistribution(listingsRepo),
+    avgPriceOfMostContactedListings: avgPriceOfMostContactedListings(listingsRepo, contactsRepo),
+    topFiveMostContactedListings: topFiveMostContactedListings(listingRepo, contactRepo)
+  }
+}
+
+export { generateReports }
