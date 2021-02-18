@@ -8,14 +8,15 @@ const avgListingSellingPrice = (listingRepo) => {
   const output = [];
 
   sellerTypes.forEach((sellerType) => {
+    // Find all the listings for a certain seller type
     const sellerListings = listings.filter(
       (listing) => listing.seller_type === sellerType
     );
 
+    // Calculcate the average listing selling price for that seller type
     const total = sellerListings.reduce((acc, currVal) => {
       return { price: acc.price + currVal.price };
     });
-
     const average = Math.round(total.price / sellerListings.length);
 
     output.push({ sellerType, average });
