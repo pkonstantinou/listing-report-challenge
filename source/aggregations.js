@@ -3,6 +3,9 @@ import listingRepo from "../repos/listing_repo.js";
 import contactRepo from "../repos/contact_repo.js";
 
 const avgListingSellingPrice = (listingRepo) => {
+  // Return an empty array if the repo provided is empty
+  if (listingRepo.length === 0) return [];
+
   const listings = listingRepo.all();
   const sellerTypes = ["dealer", "private", "other"];
   const output = [];
