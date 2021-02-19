@@ -1,13 +1,13 @@
-import path from 'path'
-import csv from 'csvtojson'
-import { __dirname } from './expose.mjs'
+import path from "path";
+import csv from "csvtojson";
+import { __dirname } from "./expose.js";
 
 const contactRepo = {
   data: [],
 
   async load() {
     const contacts = await csv().fromFile(
-      path.join(__dirname, "../data/contacts.csv")
+      path.join(__dirname, "../data/contacts.csv"),
     );
 
     this.data = contacts.map((contact) => {
@@ -20,7 +20,7 @@ const contactRepo = {
 
   all() {
     return this.data;
-  }
+  },
 };
 
 export default contactRepo;

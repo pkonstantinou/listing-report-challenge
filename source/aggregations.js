@@ -1,16 +1,16 @@
-import { calculateFrequencies, remodelDataBasedOnDate } from './utils.mjs'
-import listingRepo from '../repos/listing_repo.mjs';
-import contactRepo from '../repos/contact_repo.mjs';
+import { calculateFrequencies, remodelDataBasedOnDate } from "./utils.js";
+import listingRepo from "../repos/listing_repo.js";
+import contactRepo from "../repos/contact_repo.js";
 
 const avgListingSellingPrice = (listingRepo) => {
-  const listings = listingRepo.all()
+  const listings = listingRepo.all();
   const sellerTypes = ["dealer", "private", "other"];
   const output = [];
 
   sellerTypes.forEach((sellerType) => {
     // Find all the listings for a certain seller type
     const sellerListings = listings.filter(
-      (listing) => listing.seller_type === sellerType
+      (listing) => listing.seller_type === sellerType,
     );
 
     // Calculcate the average listing selling price for that seller type
@@ -25,7 +25,7 @@ const avgListingSellingPrice = (listingRepo) => {
 };
 
 const percentualDistribution = (listingRepo) => {
-  const listings = listingRepo.all()
+  const listings = listingRepo.all();
   const count = {};
 
   // Count how many times a certain make appears in the listings dataset
@@ -59,7 +59,7 @@ const avgPriceOfMostContactedListings = (listingRepo, contactRepo) => {
   // Calculate the average price of the highest 30%
   let total = 0;
   mostContactedListings.forEach((listing) => {
-    total += listingRepo.find(listing[0])['price']
+    total += listingRepo.find(listing[0])["price"];
   });
   const average = Math.round(total / size);
 
@@ -76,7 +76,7 @@ const topFiveMostContactedListings = (listingRepo, contactRepo) => {
       const monthlyContacts = data[year][month];
       const monthlyContactFreqs = calculateFrequencies(
         monthlyContacts,
-        "listing_id"
+        "listing_id",
       );
       // Sort by highest contacted and keep the top 5
       const entries = Object.entries(monthlyContactFreqs);
@@ -105,13 +105,18 @@ const topFiveMostContactedListings = (listingRepo, contactRepo) => {
 };
 
 const generateReports = (listingsRepo, contactsRepo) => {
-  
   return {
     avgListingSellingPrice: avgListingSellingPrice(listingsRepo),
     percentualDistribution: percentualDistribution(listingsRepo),
-    avgPriceOfMostContactedListings: avgPriceOfMostContactedListings(listingsRepo, contactsRepo),
-    topFiveMostContactedListings: topFiveMostContactedListings(listingRepo, contactRepo)
-  }
-}
+    avgPriceOfMostContactedListings: avgPriceOfMostContactedListings(
+      listingsRepo,
+      contactsRepo,
+    ),
+    topFiveMostContactedListings: topFiveMostContactedListings(
+      listingRepo,
+      contactRepo,
+    ),
+  };
+};
 
-export { generateReports }
+export { generateReports };
