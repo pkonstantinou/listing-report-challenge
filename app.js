@@ -6,8 +6,8 @@ import contactRepo from "./repos/contact_repo.js";
 import { generateReports } from "./source/aggregations.js";
 
 // Load the repositories
-await listingRepo.load();
-await contactRepo.load();
+await listingRepo.load("../data/listings.csv");
+await contactRepo.load("../data/contacts.csv");
 
 const PORT = process.env.PORT || 3000;
 const app = express();

@@ -1,14 +1,13 @@
 import path from "path";
-import csv from "csvtojson";
 import { __dirname } from "./expose.js";
+import csv from "csvtojson";
 
 const listingRepo = {
   data: [],
 
-  async load() {
-    const listings = await csv().fromFile(
-      path.join(__dirname, "../data/listings.csv"),
-    );
+  async load(filepath) {
+    const repoFilepath = path.join(__dirname, filepath);
+    const listings = await csv().fromFile(repoFilepath);
 
     this.data = listings.map((listing) => {
       return {

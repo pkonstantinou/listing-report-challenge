@@ -119,4 +119,10 @@ const generateReports = (listingsRepo, contactsRepo) => {
   };
 };
 
-export { generateReports };
+export {
+  avgListingSellingPrice,
+  percentualDistribution,
+  avgPriceOfMostContactedListings,
+  topFiveMostContactedListings,
+  generateReports,
+};
