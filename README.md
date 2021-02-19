@@ -113,8 +113,8 @@ To run the application you will need the following:
 - Inside the project directory run `npm install` in order to install all the dependencies.
 - Start the server with `npm start`
 - Navigate to `http://localhost:3000` to get a review all the reports.
-- Make a get request to API endpoint `http://localhost:3000/api/report` to receive a json file with all the reports in a sctructured format.
+- Make a get request to API endpoint `http://localhost:3000/api/reports` to receive a json file with all the reports in a sctructured format.
 
 ## Tests
 
-At the present state of the repository, the only tests that are provided is for the function #avgListingSellingPrice. To run all test simply execute the command `npm test` inside the project's directory.
+At the present state of the repository, the only tests that are provided are for the function #avgListingSellingPrice. To run all tests simply execute the command `npm test` inside the project's directory.
