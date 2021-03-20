@@ -1,131 +1,77 @@
-import { calculateFrequencies, remodelDataBasedOnDate } from "./utils.js";
-import listingRepo from "../repos/listing_repo.js";
-import contactRepo from "../repos/contact_repo.js";
+import queries from "../source/queries.js";
 
-const avgListingSellingPrice = (listingRepo) => {
-  // Return an empty array if the repo provided is empty
-  if (listingRepo.length === 0) return [];
+const avgListingSellingPrice = async (db) => {
+  const results = await db.query(queries.avgListingSellingPrice());
 
-  const listings = listingRepo.all();
-  const sellerTypes = ["dealer", "private", "other"];
-  const output = [];
-
-  sellerTypes.forEach((sellerType) => {
-    // Find all the listings for a certain seller type
-    const sellerListings = listings.filter(
-      (listing) => listing.seller_type === sellerType,
-    );
-
-    // Calculcate the average listing selling price for that seller type
-    const total = sellerListings.reduce((acc, currVal) => {
-      return { price: acc.price + currVal.price };
-    });
-    const average = Math.round(total.price / sellerListings.length);
-
-    output.push({ sellerType, average });
-  });
-  return output;
+  return results.map((element) => ({
+    sellerType: element.seller_type,
+    average: element.avg,
+  }));
 };
 
-const percentualDistribution = (listingRepo) => {
-  const listings = listingRepo.all();
-  const count = {};
+const percentualDistribution = async (db) => {
+  const results = await db.query(queries.percentualDistribution());
 
-  // Count how many times a certain make appears in the listings dataset
-  listings.forEach((listing) => {
-    if (Object.keys(count).includes(listing.make)) {
-      count[listing.make] += 1;
-    } else {
-      count[listing.make] = 1;
-    }
+  const obj = {};
+  results.forEach((element) => {
+    obj[element.make] = element.distribution;
   });
-
-  // Convert the count to a percentual amount of listings
-  for (let key of Object.keys(count)) {
-    count[key] = Math.round((count[key] / listings.length) * 100);
-  }
-
-  return count;
+  return obj;
 };
 
-const avgPriceOfMostContactedListings = (listingRepo, contactRepo) => {
-  const contactFreqs = calculateFrequencies(contactRepo.all(), "listing_id");
+const avgPriceOfMostContactedListings = async (db) => {
+  let result = await db.query(queries.listingsCount());
+  const count = result[0].count;
+  const thirtyPercent = Math.round(count * 0.3);
 
-  // Sort by highest contacted
-  const entries = Object.entries(contactFreqs);
-  const sorted = entries.sort((a, b) => b[1] - a[1]);
-
-  // Keep only the highest 30%
-  const size = Math.round(sorted.length * 0.3);
-  const mostContactedListings = sorted.slice(0, size);
-
-  // Calculate the average price of the highest 30%
-  let total = 0;
-  mostContactedListings.forEach((listing) => {
-    total += listingRepo.find(listing[0])["price"];
-  });
-  const average = Math.round(total / size);
-
-  return average;
+  result = await db.query(
+    queries.avgPriceOfMostContactedListings(thirtyPercent),
+  );
+  return result[0].average_price;
 };
 
-const topFiveMostContactedListings = (listingRepo, contactRepo) => {
-  // Remodel the contacts dataset based on date
-  const data = remodelDataBasedOnDate(contactRepo.all(), "contact_date");
+const topFiveMostContactedListings = async (db) => {
+  let result = await db.query(queries.months());
+  const dates = result.map((element) => element.contact_month);
 
-  // Dig into the remodeled dataset and search for most contacted listings
-  Object.keys(data).forEach((year) => {
-    Object.keys(data[year]).forEach((month) => {
-      const monthlyContacts = data[year][month];
-      const monthlyContactFreqs = calculateFrequencies(
-        monthlyContacts,
-        "listing_id",
-      );
-      // Sort by highest contacted and keep the top 5
-      const entries = Object.entries(monthlyContactFreqs);
-      const sorted = entries.sort((a, b) => b[1] - a[1]);
-      const topFiveListings = sorted.slice(0, 5);
+  const obj = {};
+  for (const date of dates) {
+    const topFive = await db.query(queries.topFiveMostContactedListings(date));
+    const [month, year] = date.split(".");
 
-      // For each listing of the top 5, retrieve its details from the
-      // listings dataset and store them in a temporary array
-      const tempArray = [];
-      topFiveListings.forEach((listing, index) => {
-        const element = listingRepo.find(listing[0]);
-        const object = {
-          listing_id: listing[0],
-          amount_of_contacts: listing[1],
-          ranking: index + 1,
-          make: element["make"],
-          price: element["price"],
-          mileage: element["mileage"],
-        };
-        tempArray.push(object);
+    if (!obj[year]) obj[year] = {};
+    if (!obj[month]) obj[year][month] = [];
+
+    topFive.forEach((listing, index) => {
+      obj[year][month].push({
+        listing_id: listing.listing_id.toString(),
+        amount_of_contacts: listing.count,
+        ranking: index + 1,
+        make: listing.make,
+        price: listing.price,
+        mileage: listing.mileage,
       });
-      data[year][month] = tempArray;
     });
-  });
-  return data;
+  }
+  return obj;
 };
 
-const generateReports = (listingsRepo, contactsRepo) => {
-  return {
-    avgListingSellingPrice: avgListingSellingPrice(listingsRepo),
-    percentualDistribution: percentualDistribution(listingsRepo),
-    avgPriceOfMostContactedListings: avgPriceOfMostContactedListings(
-      listingsRepo,
-      contactsRepo,
-    ),
-    topFiveMostContactedListings: topFiveMostContactedListings(
-      listingRepo,
-      contactRepo,
-    ),
-  };
+const generateReports = async (db) => {
+  try {
+    const report1 = await avgListingSellingPrice(db);
+    const report2 = await percentualDistribution(db);
+    const report3 = await avgPriceOfMostContactedListings(db);
+    const report4 = await topFiveMostContactedListings(db);
+
+    return {
+      avgListingSellingPrice: report1,
+      percentualDistribution: report2,
+      avgPriceOfMostContactedListings: report3,
+      topFiveMostContactedListings: report4,
+    };
+  } catch (error) {
+    console.log(error);
+  }
 };
 
-export {
-  avgListingSellingPrice,
-  percentualDistribution,
-  avgPriceOfMostContactedListings,
-  topFiveMostContactedListings,
-  generateReports,
-};
+export { generateReports };
