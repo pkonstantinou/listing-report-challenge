@@ -1,13 +1,8 @@
 import express from "express";
 import path from "path";
 import { __dirname } from "./expose.js";
-import listingRepo from "./repos/listing_repo.js";
-import contactRepo from "./repos/contact_repo.js";
 import { generateReports } from "./source/aggregations.js";
-
-// Load the repositories
-await listingRepo.load("../data/listings.csv");
-await contactRepo.load("../data/contacts.csv");
+import db from "./source/database.js";
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -16,13 +11,13 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "./public")));
 app.set("view engine", "ejs");
 
-app.get("/", (req, res) => {
-  const reports = generateReports(listingRepo, contactRepo);
+app.get("/", async (req, res) => {
+  const reports = await generateReports(db);
   res.render("index", { reports });
 });
 
-app.get("/api/reports", (req, res) => {
-  const reports = generateReports(listingRepo, contactRepo);
+app.get("/api/reports", async (req, res) => {
+  const reports = await generateReports(db);
   res.json(reports);
 });
 
