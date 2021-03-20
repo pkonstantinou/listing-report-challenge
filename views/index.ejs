@@ -84,7 +84,7 @@
           <h3 class="fs-5 mt-5 fw-normal">The Top 5 most contacted listings per Month</h3>
           <% Object.keys(reports.topFiveMostContactedListings).forEach((year) => { %>
             <% Object.keys(reports.topFiveMostContactedListings[year]).forEach((month) => { %>
-              <p class="text-start mb-0 mt-5"><%= `0${month}`.slice(-2, 3) %>.<%= year %></p>
+              <p class="text-start mb-0 mt-5"><%= month %>.<%= year %></p>
               <table class="table table-hover mt-1">
                 <thead>
                   <tr>
